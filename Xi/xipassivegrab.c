@@ -166,7 +166,13 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     param.grabWindow = stuff->grab_window;
     param.cursor = stuff->cursor;
 
-    if (IsKeyboardDevice(dev)) {
+    /* The all-device placeholders are not classified as keyboards, but a
+     * passive keycode grab still uses keyboard mode ordering. Keep other
+     * wildcard grab types and concrete-device behavior unchanged. */
+    if (IsKeyboardDevice(dev) ||
+        (stuff->grab_type == XIGrabtypeKeycode &&
+         (stuff->deviceid == XIAllDevices ||
+          stuff->deviceid == XIAllMasterDevices))) {
         param.this_device_mode = stuff->grab_mode;
         param.other_devices_mode = stuff->paired_device_mode;
     }
